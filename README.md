@@ -59,7 +59,7 @@ python shakeit.py -i <input_file> [options]
 
 * `-i, --input` \<input\_file>
 
-  * Path to a whitespace‑delimited data file (e.g., `rmsd.dat`).
+  * Path to a ligand rmsd data file (e.g., `rmsd.dat`).
 
 ### Optional Arguments
 
