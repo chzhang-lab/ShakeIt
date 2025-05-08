@@ -33,9 +33,9 @@ Optional Arguments:
         show            (default) Displays the plot interactively.
         <path_to_file>  Saves the plot to the specified file.
     -t, --method        GMM fitting method:
-        gmm1            (default) Non-Bayesian fitting using a Trust-Region Reflective
+        gmm1            Non-Bayesian fitting using a Trust-Region Reflective
                         nonlinear least-squares solver (SciPy).
-        gmm2            Bayesian fitting using the Expectation-Maximization algorithm 
+        gmm2            (default) Bayesian fitting using the Expectation-Maximization algorithm 
                         (scikit-learn implementation).
     -h, --help          Displays this help message and exits.
 """)
@@ -58,7 +58,7 @@ def parse_args():
     column = 2
     skip = 0
     plot = None
-    method = "gmm1"
+    method = "gmm2"
 
     for name, value in opts:
         if name in ("-h", "--help"):
@@ -119,7 +119,9 @@ def fit_gmm2(data, max_components=8):
     gmms = []
 
     for n in n_components_range:
-        gmm = GaussianMixture(n_components=n, max_iter=100, random_state=1)
+        gmm = GaussianMixture(n_components=n, max_iter=100, 
+                            #   tol=0.0001,
+                              random_state=1)
         gmm.fit(x)
         bics.append(gmm.bic(x))
         gmms.append(gmm)
@@ -142,35 +144,38 @@ def fit_gmm2(data, max_components=8):
 
     for trial in range(3):
         gmm = GaussianMixture(n_components=best_n, max_iter=100, 
+                            #   tol=0.0001,
                              init_params='k-means++', random_state=trial)
         gmm.fit(x)
         if gmm.bic(x) < best_gmm.bic(x):
             best_gmm = gmm
 
-    weights   = np.round(best_gmm.weights_.flatten(), 4)
-    means     = np.round(best_gmm.means_.flatten(), 4)
-    std_devs  = np.round(np.sqrt(best_gmm.covariances_).flatten(), 4)
+    weights   = best_gmm.weights_.flatten()
+    means     = best_gmm.means_.flatten()
+    std_devs  = np.sqrt(best_gmm.covariances_).flatten()
     return weights, means, std_devs
 
-def weighting_parm(sigma_values, mean_values, height_values, method):
+def weighting_parm(sigma_values, mean_values, height_values, method, N):
     sigma_weight = 0
     mean_weight = 0
     if method == "gmm1":
         s_values = [h * sigma for h, sigma in zip(height_values, sigma_values)]
         total_s = sum(s_values)
-        weights = [round(s / total_s, 4) for s in s_values]
+        weights = [s / total_s for s in s_values]
         for sigma, mean, weight in zip(sigma_values, mean_values, weights):
             sigma_weight += sigma * weight
             mean_weight += mean * weight
+        sigma_weight = sigma_weight * N
     elif method == "gmm2":
         for sigma, mean, weight in zip(sigma_values, mean_values, height_values):
             sigma_weight += sigma * weight
             mean_weight += mean * weight
             weights = height_values
+        sigma_weight = sigma_weight * N
     return sigma_weight, mean_weight, weights
 
 def sg_calculate(n, mean_weight, sigma_weight, a, b):
-    sg = a*mean_weight + (1-a)*(b*sigma_weight*n + (1-b)*np.log(n+4))
+    sg = a*mean_weight + (1-a)*(b*sigma_weight + (1-b)*np.log(n+4))
     return sg
 
 def main(input_file, output_mode, output_file, column, skip, plot, method):
@@ -263,9 +268,9 @@ def main(input_file, output_mode, output_file, column, skip, plot, method):
                 continue
             if width > guess[index * 3 + 2] * 3.2:
                 continue
-            height_list.append(np.round(height, 4))
-            mean_list.append(np.round(mean, 4))
-            sigma.append(np.round(width, 4))
+            height_list.append(height)
+            mean_list.append(mean)
+            sigma.append(width)
 
     elif method == "gmm2":
         weights, means, std_devs = fit_gmm2(data)
@@ -274,7 +279,7 @@ def main(input_file, output_mode, output_file, column, skip, plot, method):
         sigma = std_devs.tolist()
 
     N = len(sigma)
-    sigma_weight, mean_weight, weights = weighting_parm(sigma, mean_list, height_list, method)
+    sigma_weight, mean_weight, weights = weighting_parm(sigma, mean_list, height_list, method, N)
     a = 0.88
     b = 0.38
     sg = sg_calculate(N, mean_weight, sigma_weight, a, b)
@@ -313,7 +318,7 @@ def main(input_file, output_mode, output_file, column, skip, plot, method):
 
         for i in range(len(weights)):
             comp_pdf = weights[i] * norm.pdf(x_plot, loc=mean_list[i], scale=sigma[i])
-            plt.plot(x_plot, comp_pdf, '--', label=f'g{i+1}(x), w{i+1}={weights[i]}, μ{i+1}={mean_list[i]}, σ{i+1}={sigma[i]}')
+            plt.plot(x_plot, comp_pdf, '--', label=f'g{i+1}(x), w{i+1}={weights[i]:.4f}, μ{i+1}={mean_list[i]:.4f}, σ{i+1}={sigma[i]:.4f}')
             total_pdf += comp_pdf
 
         plt.plot(x_plot, total_pdf, '-', linewidth=2, color='Gray', label='G(x)')
