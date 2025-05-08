@@ -70,7 +70,7 @@ python shakeit.py -i <input_file> [options]
 | `-r, --column`      | Column index (1‑based) to read from input.                                 | `2`     |
 | `-s, --skip`        | Number of header lines to skip in input file.                              | `0`     |
 | `-p, --plot`        | `show` — display plot; `<path>` — save plot to file.                       | none    |
-| `-t, --method`      | `gmm1` — SciPy nonlinear least‑squares; `gmm2` — scikit‑learn EM.          | `gmm1`  |
+| `-t, --method`      | `gmm1` — SciPy nonlinear least‑squares; `gmm2` — scikit‑learn EM.          | `gmm2`  |
 | `-h, --help`        | Show help message and exit.                                                |         |
 
 ### Examples
