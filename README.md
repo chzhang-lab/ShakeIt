@@ -1,6 +1,7 @@
 ## ShakeIt
 
 ShakeIt is a command-line tool designed to quantify binding stability by clustering ligand conformations from molecular dynamics (MD) simulations using Gaussian mixture models (GMMs). It takes RMSD values as input and outputs four parameters:
+
 n, the number of conformational clusters (i.e., local minima near the initial state of the binding complex);
 
 µ, the mean RMSD between each cluster and the initial state (with smaller µ values indicating minimal conformational drift);
