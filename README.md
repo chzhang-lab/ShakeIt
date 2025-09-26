@@ -1,6 +1,25 @@
 ## ShakeIt
 
-A command‑line tool for analyzing ligand conformational distributions from molecular dynamics (MD) simulations using Gaussian mixture models (GMMs).
+ShakeIt is a command-line tool designed to quantify binding stability by clustering ligand conformations from molecular dynamics (MD) simulations using Gaussian mixture models (GMMs). It takes RMSD values as input and outputs four parameters:
+n, the number of conformational clusters (i.e., local minima near the initial state of the binding complex);
+
+µ, the mean RMSD between each cluster and the initial state (with smaller µ values indicating minimal conformational drift);
+
+σ, the fluctuation of the ligand within each state (reflecting the rigidity of the ligand within a given metastable state);
+
+w, the population proportion of each state, representing its relative thermodynamic occupancy.
+
+In addition, the Sg score integrates conformational drift (µ), fluctuation (σ), and the number of Gaussian components (n) to provide a quantitative measure of binding stability. Typically, an Sg score below 1 indicates that the ligand exhibits stable binding.
+
+
+A typical workflow for using ShakeIt in virtual screening involves, for each ligand, (i) sampling putative binding conformations via molecular docking, (ii) estimating affinities either through docking scores or through a more reliable method such as MMGBSA or absolute binding free energy (ABFE) calculations, and (iii) computing the Sg score to evaluate conformational stability. Subsequently, the Sg score is integrated as a weighting term to adjust predicted affinities or to flag nonbinding conformers, thereby combining thermodynamic and kinetic insights to enhance prediction robustness.
+
+![image](workflow.png)
+
+---
+
+## Citation
+If you use ShakeIt, please cite: https://doi.org/10.1039/d5cp02983j
 
 ---
 
