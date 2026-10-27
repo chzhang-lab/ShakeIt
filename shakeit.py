@@ -326,7 +326,7 @@ def main(input_file, output_mode, output_file, column, skip, plot, method):
         plt.xlabel('RMSD(Å)')
         plt.ylabel('Density')
         plt.legend()
-        plt.grid(True)
+        plt.grid(False)
 
         if plot == "show":
             plt.show()
