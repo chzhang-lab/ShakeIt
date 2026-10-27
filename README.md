@@ -117,7 +117,7 @@ python shakeit.py -i <input_file> [options]
 
    ```bash
    python shakeit.py -i rmsd.dat -s 100 -p plot.png
-   python shakeit.py -i rmsd.dat -s 100 -p 1086-200ns.pdf -m all
+   python shakeit.py -i rmsd.dat -s 100 -p plot.pdf -m all
    ```
 
 ---
